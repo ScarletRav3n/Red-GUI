@@ -4,7 +4,6 @@ from PyQt5.QtCore import Qt, QProcess
 from PyQt5.QtWidgets import (QWidget, QPushButton, QMessageBox, QLineEdit,
                              QTextEdit, QRadioButton, QLabel, QApplication)
 from cogs.utils.settings import Settings
-from decimal import Decimal
 import urllib.request
 import subprocess
 import os
@@ -140,7 +139,7 @@ class MainWindow(QWidget):
 
         self.process = QProcess()
         self.output = QTextEdit()
-        self.percent = Decimal('0.0')
+        self.percent = 0
 
         self.rbox.insertSpacing(1, 10)
         self.pbar = QtWidgets.QProgressBar()
@@ -152,7 +151,7 @@ class MainWindow(QWidget):
 
         self.rbox.addWidget(b5)
         self.rbox.addWidget(self.output)
-        self.process.readyRead.connect(lambda: self.console_data(audio))
+        self.process.readyRead.connect(self.console_data)
         self.output.hide()
 
         # data flow
@@ -173,13 +172,6 @@ class MainWindow(QWidget):
         # do call
         self.process.start(interpreter, args)
 
-        # if self.percent == 100 and (self.process.exitCode() == 0):
-        #     QMessageBox.information(self, "Done!", "Requirements setup completed.")
-        #     self.b2.setEnabled(True)
-        # elif self.percent == 100:
-        #     QMessageBox.warning(self, "Error", "An error occurred and the requirements "
-        #                                        "setup might not be completed. Consult the docs.")
-
         # buttons
         self.buttons_panel()
 
@@ -198,7 +190,7 @@ class MainWindow(QWidget):
         else:
             self.output.show()
 
-    def console_data(self, audio):
+    def console_data(self):
         js = str(self.process.readAll(), 'utf-8')
 
         cursor = self.output.textCursor()
@@ -206,20 +198,14 @@ class MainWindow(QWidget):
         cursor.insertText(js)
         self.output.ensureCursorVisible()
 
-        if audio is True:
-            self.percent += Decimal('2.45')
-        else:
-            self.percent += Decimal('3.225')
-        if self.percent > 95:
+        self.percent += 3
+        if self.percent > 90:
             self.percent = 100
         self.pbar.setValue(self.percent)
 
-        if self.percent == 100 and (self.process.exitCode() == 0):
+        if self.percent == 100:
             QMessageBox.information(self, "Done!", "Requirements setup completed.")
             self.b2.setEnabled(True)
-        elif self.percent == 100:
-            QMessageBox.warning(self, "Error", "An error occurred and the requirements "
-                                               "setup might not be completed. Consult the docs.")
 
     def token_ui(self):
         self.clear_layout(self.rbox)
