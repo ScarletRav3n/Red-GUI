@@ -94,6 +94,7 @@ class MainWindow(QWidget):
 
         # window
         self.setFixedSize(220, 210)
+        self.setWindowIcon(QtGui.QIcon('red.ico'))
         self.setWindowTitle('Red Bot')
         self.show()
 
@@ -173,7 +174,8 @@ class UpdateWindow(QWidget):
 
         # window
         self.setFixedSize(220, 210)
-        self.setWindowTitle('Red Bot - Requirements')
+        self.setWindowIcon(QtGui.QIcon('red.ico'))
+        self.setWindowTitle('Red Bot - Update')
         self.show()
 
     def update_red(self):
@@ -258,7 +260,7 @@ class RequirementsWindow(QWidget):
         box.addWidget(self.r2, 0, Qt.AlignLeft)
         # box.insertSpacing(1, 10)
 
-        l3 = QLabel("FFMPEG (Audio Requirements)", self)
+        l3 = QLabel("FFMPEG (required for audio)", self)
         box.addWidget(l3, 0, Qt.AlignLeft)
         self.r3 = QRadioButton("Install ffmpeg 32bit")
         box.addWidget(self.r3, 0, Qt.AlignLeft)
@@ -283,6 +285,7 @@ class RequirementsWindow(QWidget):
 
         # window
         self.setFixedSize(220, 210)
+        self.setWindowIcon(QtGui.QIcon('red.ico'))
         self.setWindowTitle('Red Bot - Requirements')
         self.show()
 
@@ -365,7 +368,8 @@ class MaintenanceWindow(QWidget):
 
         # window
         self.setFixedSize(320, 210)
-        self.setWindowTitle('Red Bot - Requirements')
+        self.setWindowIcon(QtGui.QIcon('red.ico'))
+        self.setWindowTitle('Red Bot - Maintenance')
         self.show()
 
     def ok_clicked(self):
