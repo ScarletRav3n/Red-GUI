@@ -112,9 +112,12 @@ class MainWindow(QWidget):
         self.rbox.addWidget(self.r2, 0, Qt.AlignLeft)
 
         if os.path.exists("lib"):
+            l5 = QLabel(self)
+            l5.setText('<font color="#ff0000">Requirements already installed.</font>')
+            self.rbox.addWidget(l5, 1, Qt.AlignBottom)
             b5 = QPushButton("Skip", self)
             b5.setMaximumWidth(50)
-            self.rbox.addWidget(b5, 1, Qt.AlignBottom)
+            self.rbox.addWidget(b5, 0, Qt.AlignBottom)
             b5.clicked.connect(self.token_ui)
 
         # buttons
@@ -142,12 +145,15 @@ class MainWindow(QWidget):
         self.percent = 0
 
         self.rbox.insertSpacing(1, 10)
-        self.pbar = QtWidgets.QProgressBar()
-        self.pbar.setGeometry(30, 40, 200, 25)
-        self.rbox.addWidget(self.pbar)
+        l2 = QLabel('Press Next when the last line says "Successfully Installed--"')
+        self.rbox.addWidget(l2, 0, Qt.AlignTop)
+        # this can be uncommented whenever I actually figure out Progress Bars
+        # self.pbar = QtWidgets.QProgressBar()
+        # self.pbar.setGeometry(30, 40, 200, 25)
+        # self.rbox.addWidget(self.pbar)
 
         b5 = QPushButton("Dialog", self)
-        b5.setMaximumWidth(50)
+        b5.setMaximumWidth(75)
 
         self.rbox.addWidget(b5)
         self.rbox.addWidget(self.output)
@@ -177,7 +183,7 @@ class MainWindow(QWidget):
 
         # binds
         self.b1.setEnabled(True)
-        self.b2.setEnabled(False)
+        # self.b2.setEnabled(False)
         self.b1.clicked.connect(self.req_ui)
         self.b1.clicked.connect(self.process.close)
         self.b2.clicked.connect(self.token_ui)
@@ -198,14 +204,14 @@ class MainWindow(QWidget):
         cursor.insertText(js)
         self.output.ensureCursorVisible()
 
-        self.percent += 3
-        if self.percent > 90:
-            self.percent = 100
-        self.pbar.setValue(self.percent)
-
-        if self.percent == 100:
-            QMessageBox.information(self, "Done!", "Requirements setup completed.")
-            self.b2.setEnabled(True)
+        # self.percent += 3
+        # if self.percent > 90:
+        #     self.percent = 100
+        # self.pbar.setValue(self.percent)
+        #
+        # if self.percent == 100:
+        #     QMessageBox.information(self, "Done!", "Requirements setup completed.")
+        #     self.b2.setEnabled(True)
 
     def token_ui(self):
         self.clear_layout(self.rbox)
@@ -220,11 +226,21 @@ class MainWindow(QWidget):
         self.token_edit = QLineEdit(self)
         self.token_edit.setMaximumWidth(300)
         self.rbox.addWidget(self.token_edit, 0, Qt.AlignTop)
+
         l2 = QLabel("Your token can be found in Discord's "
                     "<a href='https://discordapp.com/developers/applications/me'>App Page</a>")
         l2.setOpenExternalLinks(True)
         l2.setFont(self.small_font)
-        self.rbox.addWidget(l2, 1, Qt.AlignBottom)
+        self.rbox.addWidget(l2, 0, Qt.AlignBottom)
+
+        if self.settings.token is not None:
+            l5 = QLabel(self)
+            l5.setText('<font color="#ff0000">"' + self.settings.token[0:10] + '--"</font>\nis your current token')
+            self.rbox.addWidget(l5, 1, Qt.AlignBottom)
+            b5 = QPushButton("Skip", self)
+            b5.setMaximumWidth(50)
+            self.rbox.addWidget(b5, 0, Qt.AlignBottom)
+            b5.clicked.connect(self.prefix_ui)
 
         # buttons
         self.buttons_panel()
@@ -250,7 +266,7 @@ class MainWindow(QWidget):
             self.prefix_ui()
 
     def token_on_change(self, text):
-        self.token_print.setText("Token: \n" + text.replace('.', '.\n'))
+        self.token_print.setText("Token: " + text.replace('.', '.\n'))
         self.token_print.adjustSize()
         self.token_print.setWordWrap(True)
 
@@ -267,30 +283,46 @@ class MainWindow(QWidget):
                                   '<font color="#ff0000">!help</font>')
         self.prefix_print.setWordWrap(True)
         self.rbox.addWidget(self.prefix_print, 0, Qt.AlignTop)
-        prefix_edit = QLineEdit(self)
-        prefix_edit.setPlaceholderText("!")
-        prefix_edit.setMaximumWidth(300)
-        self.rbox.addWidget(prefix_edit, 0, Qt.AlignTop)
+        self.prefix_edit = QLineEdit(self)
+        self.prefix_edit.setPlaceholderText("!")
+        self.prefix_edit.setMaximumWidth(300)
+        self.rbox.addWidget(self.prefix_edit, 0, Qt.AlignTop)
 
         l2 = QLabel(self)
         l2.setText('\nPrefixes are referred to in the bot with [p]. '
-                   '\nAny time you see [p], replace it with your prefix')
-        self.rbox.addWidget(l2, 1, Qt.AlignBottom)
+                   '\nAny time you see [p], replace it with your prefix.')
+        self.rbox.addWidget(l2, 0, Qt.AlignCenter)
+
+        matches = [a for a in self.settings.prefixes]
+        if len(matches) > 0:
+            prefixes = ', '.join(self.settings.prefixes)
+            if len(matches) == 1:
+                plural = "</font>\nis your current prefix."
+            elif len(matches) > 1:
+                plural = "</font>\nare your current prefixes."
+            l5 = QLabel(self)
+            l5.setText('<font color="#ff0000">' + prefixes + plural)
+            self.rbox.addWidget(l5, 1, Qt.AlignBottom)
+            b5 = QPushButton("Skip", self)
+            b5.setMaximumWidth(50)
+            self.rbox.addWidget(b5, 0, Qt.AlignBottom)
+            b5.clicked.connect(self.admin_ui)
 
         # buttons
         self.buttons_panel()
 
         # binds
-        prefix_edit.textChanged[str].connect(self.prefix_on_change)
+        self.prefix_edit.textChanged[str].connect(self.prefix_on_change)
         self.b1.setEnabled(True)
         self.b1.clicked.connect(self.token_ui)
         self.b2.clicked.connect(self.prefix_save)
         self.b3.clicked.connect(self.close_prompt)
 
-    def prefix_save(self, prefix):
+    def prefix_save(self):
+        prefix = str(self.prefix_edit.text())
         if prefix is "":
             prefix = "!"
-        self.settings.prefixes = prefix
+        self.settings.prefixes.append(prefix)
         self.admin_ui()
 
     def prefix_on_change(self, text):
@@ -369,15 +401,10 @@ class MainWindow(QWidget):
             return
 
     def finish_prompt(self):
-        fbox = QMessageBox.information(self,
-                                       "Done!",
-                                       "Red has been configured. Would you like to start Red?",
-                                       QMessageBox.Yes, QMessageBox.No)
-        if fbox == QMessageBox.Yes:
-            subprocess.call((sys.executable, "launcher.py", "--start"),
-                            creationflags=subprocess.CREATE_NEW_CONSOLE, shell=False)
-        else:
-            return
+        QMessageBox.information(self,
+                                "Done!",
+                                "Red has been configured.",
+                                QMessageBox.Ok)
         self.settings.save_settings()
         self.close()
 
